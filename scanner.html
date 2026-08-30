@@ -20,19 +20,75 @@
 <body>
   <div class="wrap">
     <div class="card">
-      <h2>工單條碼掃描</h2>
+      <h2 id="titleText">工單條碼掃描</h2>
       <button id="startBtn" class="primary" onclick="startScanner()">開啟相機掃描</button>
       <div id="reader"></div>
-      <button class="secondary" onclick="goBack()">返回工時系統</button>
+     <button id="backBtn" class="secondary" onclick="goBack()">返回工時系統</button>
       <div id="msg">請按「開啟相機掃描」並允許相機權限。</div>
     </div>
   </div>
 
 <script>
+
+const params = new URLSearchParams(window.location.search);
+const currentLang = params.get('lang') || 'zh';
+
+const LANG = {
+  zh: {
+    title: '工單條碼掃描',
+    start: '開啟相機掃描',
+    back: '返回工時系統',
+    initial: '請按「開啟相機掃描」並允許相機權限。',
+    opening: '正在開啟相機…',
+    scanHint: '請將工單條碼置於掃描框內。',
+    cameraError: '無法開啟相機：',
+    success: '掃描成功：'
+  },
+
+  en: {
+    title: 'Work Order Barcode Scanner',
+    start: 'Open Camera Scanner',
+    back: 'Back to Work Time System',
+    initial: 'Press "Open Camera Scanner" and allow camera access.',
+    opening: 'Opening camera…',
+    scanHint: 'Place the work order barcode inside the scanning frame.',
+    cameraError: 'Unable to open camera: ',
+    success: 'Scan successful: '
+  },
+
+  id: {
+    title: 'Pemindai Barcode Perintah Kerja',
+    start: 'Buka Kamera Pemindai',
+    back: 'Kembali ke Sistem Waktu Kerja',
+    initial: 'Tekan "Buka Kamera Pemindai" dan izinkan akses kamera.',
+    opening: 'Membuka kamera…',
+    scanHint: 'Letakkan barcode perintah kerja di dalam bingkai pemindaian.',
+    cameraError: 'Tidak dapat membuka kamera: ',
+    success: 'Pemindaian berhasil: '
+  }
+};
+
+const t = LANG[currentLang] || LANG.zh;
+
 const RETURN_URL = "https://script.google.com/macros/s/AKfycbxF9N5O0mXuTVBJh_C9tsFsMyKvr8UJEuFzNLYF3gLVWumDoqJENyNrO-i0JJKzCQ8/exec";
+
+const RETURN_WITH_LANG =
+  RETURN_URL +
+  '?lang=' +
+  encodeURIComponent(currentLang);
+
 let scanner = null;
 let isFinishing = false;
-
+  
+function applyLanguage() {
+  document.getElementById("titleText").textContent = t.title;
+  document.getElementById("startBtn").textContent = t.start;
+  document.getElementById("backBtn").textContent = t.back;
+  document.getElementById("msg").textContent = t.initial;
+}
+  window.onload = function() {
+  applyLanguage();
+};
 function setMsg(text) {
   document.getElementById("msg").textContent = text;
 }
@@ -45,7 +101,7 @@ function startScanner() {
   }
 
   document.getElementById("startBtn").disabled = true;
-  setMsg("正在開啟相機…");
+  setMsg(t.opening);
 
   scanner.start(
     { facingMode: "environment" },
@@ -53,10 +109,10 @@ function startScanner() {
     onScanSuccess,
     function() {}
   ).then(function() {
-    setMsg("請將工單條碼置於掃描框內。");
+    setMsg(t.scanHint);
   }).catch(function(err) {
     document.getElementById("startBtn").disabled = false;
-    setMsg("無法開啟相機：" + err);
+    setMsg(t.cameraError + err);
   });
 }
 
@@ -70,12 +126,14 @@ function onScanSuccess(decodedText) {
     return;
   }
 
-  setMsg("掃描成功：" + code);
+ setMsg(t.success + code);
 
   const target =
-    RETURN_URL +
-    "?workOrder=" +
-    encodeURIComponent(code);
+  RETURN_URL +
+  "?workOrder=" +
+  encodeURIComponent(code) +
+  "&lang=" +
+  encodeURIComponent(currentLang);
 
   if (scanner && scanner.isScanning) {
     scanner.stop()
@@ -93,10 +151,10 @@ function goBack() {
     scanner.stop()
       .catch(function() {})
       .finally(function() {
-        window.location.href = RETURN_URL;
+        window.location.href = RETURN_WITH_LANG;
       });
   } else {
-    window.location.href = RETURN_URL;
+    window.location.href = RETURN_WITH_LANG;
   }
 }
 </script>
