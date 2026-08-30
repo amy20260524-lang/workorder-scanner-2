@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>工單條碼掃描</title>
+  <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+  <style>
+    body { font-family: Arial, "Microsoft JhengHei", sans-serif; margin: 0; background: #f3f4f6; }
+    .wrap { max-width: 560px; margin: auto; padding: 18px; }
+    .card { background: #fff; border-radius: 12px; padding: 18px; box-shadow: 0 2px 8px rgba(0,0,0,.08); }
+    h2 { margin: 0 0 12px; }
+    button { width: 100%; box-sizing: border-box; padding: 13px; margin-top: 10px; font-size: 17px; border: 0; border-radius: 8px; cursor: pointer; }
+    .primary { background: #2563eb; color: #fff; }
+    .secondary { background: #64748b; color: #fff; }
+    #reader { margin-top: 12px; }
+    #msg { margin-top: 12px; font-size: 14px; color: #475569; word-break: break-all; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card">
+      <h2>工單條碼掃描</h2>
+      <button id="startBtn" class="primary" onclick="startScanner()">開啟相機掃描</button>
+      <div id="reader"></div>
+      <button class="secondary" onclick="goBack()">返回工時系統</button>
+      <div id="msg">請按「開啟相機掃描」並允許相機權限。</div>
+    </div>
+  </div>
+
+<script>
+const RETURN_URL = "https://script.google.com/macros/s/AKfycbxF9N5O0mXuTVBJh_C9tsFsMyKvr8UJEuFzNLYF3gLVWumDoqJENyNrO-i0JJKzCQ8/exec";
+let scanner = null;
+let isFinishing = false;
+
+function setMsg(text) {
+  document.getElementById("msg").textContent = text;
+}
+
+function startScanner() {
+  if (scanner && scanner.isScanning) return;
+
+  if (!scanner) {
+    scanner = new Html5Qrcode("reader");
+  }
+
+  document.getElementById("startBtn").disabled = true;
+  setMsg("正在開啟相機…");
+
+  scanner.start(
+    { facingMode: "environment" },
+    { fps: 10, qrbox: { width: 280, height: 140 } },
+    onScanSuccess,
+    function() {}
+  ).then(function() {
+    setMsg("請將工單條碼置於掃描框內。");
+  }).catch(function(err) {
+    document.getElementById("startBtn").disabled = false;
+    setMsg("無法開啟相機：" + err);
+  });
+}
+
+function onScanSuccess(decodedText) {
+  if (isFinishing) return;
+  isFinishing = true;
+
+  const code = String(decodedText || "").trim();
+  if (!code) {
+    isFinishing = false;
+    return;
+  }
+
+  setMsg("掃描成功：" + code);
+
+  const target =
+    RETURN_URL +
+    "?workOrder=" +
+    encodeURIComponent(code);
+
+  if (scanner && scanner.isScanning) {
+    scanner.stop()
+      .catch(function() {})
+      .finally(function() {
+        window.location.href = target;
+      });
+  } else {
+    window.location.href = target;
+  }
+}
+
+function goBack() {
+  if (scanner && scanner.isScanning) {
+    scanner.stop()
+      .catch(function() {})
+      .finally(function() {
+        window.location.href = RETURN_URL;
+      });
+  } else {
+    window.location.href = RETURN_URL;
+  }
+}
+</script>
+</body>
+</html>
