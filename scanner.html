@@ -105,7 +105,8 @@ const params =
   new URLSearchParams(
     window.location.search
   );
-
+const target =
+  params.get('target') || '0';
 const currentLang =
   params.get("lang") || "zh";
 
@@ -207,9 +208,9 @@ const RETURN_URL =
 const RETURN_WITH_LANG =
   RETURN_URL +
   "?lang=" +
-  encodeURIComponent(
-    currentLang
-  );
+  encodeURIComponent(currentLang) +
+  "&target=" +
+  encodeURIComponent(target);
 
 
 let scanner = null;
@@ -344,18 +345,23 @@ function onScanSuccess(
   );
 
 
-  const target =
-    RETURN_URL +
+  const returnUrl =
+  RETURN_URL +
 
-    "?workOrder=" +
-    encodeURIComponent(
-      code
-    ) +
+  "?workOrder=" +
+  encodeURIComponent(
+    code
+  ) +
 
-    "&lang=" +
-    encodeURIComponent(
-      currentLang
-    );
+  "&lang=" +
+  encodeURIComponent(
+    currentLang
+  ) +
+
+  "&target=" +
+  encodeURIComponent(
+    target
+  );
 
 
   if (
@@ -373,8 +379,8 @@ function onScanSuccess(
       .finally(
         function() {
 
-          window.location.href =
-            target;
+       window.location.href =
+  returnUrl;
 
         }
       );
@@ -383,9 +389,8 @@ function onScanSuccess(
 
   else {
 
-    window.location.href =
-      target;
-
+   window.location.href =
+  returnUrl;
   }
 
 }
