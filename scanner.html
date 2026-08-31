@@ -95,35 +95,58 @@ function startScanner() {
   document.getElementById("startBtn").disabled = true;
   setMsg(t.opening);
 
-  if (!scanner) {
-    scanner = new Html5Qrcode("reader");
-  }
+  Html5Qrcode.getCameras()
+    .then(function(devices) {
 
-  scanner.start(
-    {
-      facingMode: "environment"
-    },
-    {
-      fps: 10,
-      qrbox: {
-        width: 280,
-        height: 140
+      if (!devices || devices.length === 0) {
+        throw new Error("No camera found");
       }
-    },
-    onScanSuccess,
-    function() {}
-  )
-  .then(function() {
-    setMsg(t.scanHint);
-  })
-  .catch(function(err) {
-    document.getElementById("startBtn").disabled = false;
 
-    setMsg(
-      t.cameraError +
-      (err.message || err)
-    );
-  });
+      let cameraId = devices[0].id;
+
+      // 優先找後鏡頭
+      const backCamera = devices.find(function(device) {
+        const label = (device.label || "").toLowerCase();
+
+        return (
+          label.includes("back") ||
+          label.includes("rear") ||
+          label.includes("environment")
+        );
+      });
+
+      if (backCamera) {
+        cameraId = backCamera.id;
+      }
+
+      if (!scanner) {
+        scanner = new Html5Qrcode("reader");
+      }
+
+      return scanner.start(
+        cameraId,
+        {
+          fps: 10,
+          qrbox: {
+            width: 280,
+            height: 140
+          }
+        },
+        onScanSuccess,
+        function() {}
+      );
+    })
+    .then(function() {
+      setMsg(t.scanHint);
+    })
+    .catch(function(err) {
+      document.getElementById("startBtn").disabled = false;
+
+      setMsg(
+        t.cameraError +
+        (err.message || err)
+      );
+    });
 }
 
 function onScanSuccess(decodedText) {
