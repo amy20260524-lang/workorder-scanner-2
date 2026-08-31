@@ -108,20 +108,20 @@ function startScanner() {
 
       let cameraId = devices[0].id;
 
-      // 優先找後鏡頭
-      const backCamera = devices.find(function(device) {
-        const label = (device.label || "").toLowerCase();
+   // 優先找前鏡頭
+const frontCamera = devices.find(function(device) {
+  const label = (device.label || "").toLowerCase();
 
-        return (
-          label.includes("back") ||
-          label.includes("rear") ||
-          label.includes("environment")
-        );
-      });
+  return (
+    label.includes("front") ||
+    label.includes("user") ||
+    label.includes("face")
+  );
+});
 
-      if (backCamera) {
-        cameraId = backCamera.id;
-      }
+if (frontCamera) {
+  cameraId = frontCamera.id;
+}
 
       if (!scanner) {
         scanner = new Html5Qrcode("reader");
