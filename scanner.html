@@ -257,175 +257,45 @@ function setMsg(text) {
 
 }
 
-
 function startScanner() {
+  if (scanner && scanner.isScanning) return;
 
-  if (
-    scanner &&
-    scanner.isScanning
-  ) {
-    return;
-  }
+  document.getElementById("startBtn").disabled = true;
+  setMsg(t.opening);
 
+  Html5Qrcode.getCameras()
+    .then(function(devices) {
 
-  document.getElementById(
-    "startBtn"
-  ).disabled =
-    true;
-
-
-  setMsg(
-    t.opening
-  );
-
-
-  Html5Qrcode
-    .getCameras()
-
-    .then(
-      function(devices) {
-
-
-        if (
-          !devices ||
-          devices.length === 0
-        ) {
-
-          throw new Error(
-            "No camera found"
-          );
-
-        }
-
-
-        let cameraId =
-          devices[0].id;
-
-
-        // ==========================
-        // 優先尋找後鏡頭
-        // ==========================
-
-        const backCamera =
-          devices.find(
-            function(device) {
-
-              const label =
-                (
-                  device.label ||
-                  ""
-                ).toLowerCase();
-
-
-              return (
-
-                label.includes(
-                  "back"
-                ) ||
-
-                label.includes(
-                  "rear"
-                ) ||
-
-                label.includes(
-                  "environment"
-                )
-
-              );
-
-            }
-          );
-
-
-        if (
-          backCamera
-        ) {
-
-          cameraId =
-            backCamera.id;
-
-        }
-
-
-        if (
-          !scanner
-        ) {
-
-          scanner =
-            new Html5Qrcode(
-              "reader"
-            );
-
-        }
-
-
-        return scanner.start(
-
-          cameraId,
-
-          {
-
-            fps:
-              10,
-
-            qrbox: {
-
-              width:
-                280,
-
-              height:
-                140
-
-            }
-
-          },
-
-          onScanSuccess,
-
-          function() {}
-
-        );
-
+      if (!devices || devices.length === 0) {
+        throw new Error("No camera found");
       }
-    )
 
+      let info = "";
 
-    .then(
-      function() {
+      devices.forEach(function(device, index) {
+        info +=
+          "相機 " +
+          index +
+          "｜" +
+          (device.label || "無名稱") +
+          "\nID：" +
+          device.id +
+          "\n\n";
+      });
 
-        setMsg(
-          t.scanHint
-        );
+      alert(info);
 
-      }
-    )
+      throw new Error("先確認相機清單");
+    })
+    .catch(function(err) {
+      document.getElementById("startBtn").disabled = false;
 
-
-    .catch(
-      function(err) {
-
-        document.getElementById(
-          "startBtn"
-        ).disabled =
-          false;
-
-
-        setMsg(
-
-          t.cameraError +
-
-          (
-            err.message ||
-            err
-          )
-
-        );
-
-      }
-    );
-
+      setMsg(
+        t.cameraError +
+        (err.message || err)
+      );
+    });
 }
-
 
 function onScanSuccess(
   decodedText
