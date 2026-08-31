@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>工單條碼掃描</title>
 
+
   <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 
   <style>
@@ -270,22 +271,28 @@ function startScanner() {
         throw new Error("No camera found");
       }
 
-      let info = "";
+    if (devices.length < 2) {
+  throw new Error("找不到後置相機");
+}
 
-      devices.forEach(function(device, index) {
-        info +=
-          "相機 " +
-          index +
-          "｜" +
-          (device.label || "無名稱") +
-          "\nID：" +
-          device.id +
-          "\n\n";
-      });
+const cameraId = devices[1].id;
 
-      alert(info);
+if (!scanner) {
+  scanner = new Html5Qrcode("reader");
+}
 
-      throw new Error("先確認相機清單");
+return scanner.start(
+  cameraId,
+  {
+    fps: 10,
+    qrbox: {
+      width: 280,
+      height: 140
+    }
+  },
+  onScanSuccess,
+  function() {}
+);
     })
     .catch(function(err) {
       document.getElementById("startBtn").disabled = false;
