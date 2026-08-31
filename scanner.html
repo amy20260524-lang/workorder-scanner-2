@@ -4,192 +4,551 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>工單條碼掃描</title>
+
   <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+
   <style>
-    body { font-family: Arial, "Microsoft JhengHei", sans-serif; margin: 0; background: #f3f4f6; }
-    .wrap { max-width: 560px; margin: auto; padding: 18px; }
-    .card { background: #fff; border-radius: 12px; padding: 18px; box-shadow: 0 2px 8px rgba(0,0,0,.08); }
-    h2 { margin: 0 0 12px; }
-    button { width: 100%; box-sizing: border-box; padding: 13px; margin-top: 10px; font-size: 17px; border: 0; border-radius: 8px; cursor: pointer; }
-    .primary { background: #2563eb; color: #fff; }
-    .secondary { background: #64748b; color: #fff; }
-    #reader { margin-top: 12px; }
-    #msg { margin-top: 12px; font-size: 14px; color: #475569; word-break: break-all; }
+    body {
+      font-family: Arial, "Microsoft JhengHei", sans-serif;
+      margin: 0;
+      background: #f3f4f6;
+    }
+
+    .wrap {
+      max-width: 560px;
+      margin: auto;
+      padding: 18px;
+    }
+
+    .card {
+      background: #fff;
+      border-radius: 12px;
+      padding: 18px;
+      box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    }
+
+    h2 {
+      margin: 0 0 12px;
+    }
+
+    button {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 13px;
+      margin-top: 10px;
+      font-size: 17px;
+      border: 0;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    .primary {
+      background: #2563eb;
+      color: #fff;
+    }
+
+    .secondary {
+      background: #64748b;
+      color: #fff;
+    }
+
+    #reader {
+      margin-top: 12px;
+    }
+
+    #msg {
+      margin-top: 12px;
+      font-size: 14px;
+      color: #475569;
+      word-break: break-all;
+    }
   </style>
 </head>
+
 <body>
+
   <div class="wrap">
     <div class="card">
-      <h2 id="titleText">工單條碼掃描</h2>
-      <button id="startBtn" class="primary" onclick="startScanner()">開啟相機掃描</button>
+
+      <h2 id="titleText">
+        工單條碼掃描
+      </h2>
+
+      <button
+        id="startBtn"
+        class="primary"
+        onclick="startScanner()">
+        開啟相機掃描
+      </button>
+
       <div id="reader"></div>
-     <button id="backBtn" class="secondary" onclick="goBack()">返回工時系統</button>
-      <div id="msg">請按「開啟相機掃描」並允許相機權限。</div>
+
+      <button
+        id="backBtn"
+        class="secondary"
+        onclick="goBack()">
+        返回工時系統
+      </button>
+
+      <div id="msg">
+        請按「開啟相機掃描」並允許相機權限。
+      </div>
+
     </div>
   </div>
 
+
 <script>
 
-const params = new URLSearchParams(window.location.search);
-const currentLang = params.get('lang') || 'zh';
+const params =
+  new URLSearchParams(
+    window.location.search
+  );
+
+const currentLang =
+  params.get("lang") || "zh";
+
 
 const LANG = {
+
   zh: {
-    title: '工單條碼掃描',
-    start: '開啟相機掃描',
-    back: '返回工時系統',
-    initial: '請按「開啟相機掃描」並允許相機權限。',
-    opening: '正在開啟相機…',
-    scanHint: '請將工單條碼置於掃描框內。',
-    cameraError: '無法開啟相機：',
-    success: '掃描成功：'
+    title:
+      "工單條碼掃描",
+
+    start:
+      "開啟相機掃描",
+
+    back:
+      "返回工時系統",
+
+    initial:
+      "請按「開啟相機掃描」並允許相機權限。",
+
+    opening:
+      "正在開啟相機…",
+
+    scanHint:
+      "請將工單條碼置於掃描框內。",
+
+    cameraError:
+      "無法開啟相機：",
+
+    success:
+      "掃描成功："
   },
+
 
   en: {
-    title: 'Work Order Barcode Scanner',
-    start: 'Open Camera Scanner',
-    back: 'Back to Work Time System',
-    initial: 'Press "Open Camera Scanner" and allow camera access.',
-    opening: 'Opening camera…',
-    scanHint: 'Place the work order barcode inside the scanning frame.',
-    cameraError: 'Unable to open camera: ',
-    success: 'Scan successful: '
+    title:
+      "Work Order Barcode Scanner",
+
+    start:
+      "Open Camera Scanner",
+
+    back:
+      "Back to Work Time System",
+
+    initial:
+      'Press "Open Camera Scanner" and allow camera access.',
+
+    opening:
+      "Opening camera…",
+
+    scanHint:
+      "Place the work order barcode inside the scanning frame.",
+
+    cameraError:
+      "Unable to open camera: ",
+
+    success:
+      "Scan successful: "
   },
 
+
   id: {
-    title: 'Pemindai Barcode Perintah Kerja',
-    start: 'Buka Kamera Pemindai',
-    back: 'Kembali ke Sistem Waktu Kerja',
-    initial: 'Tekan "Buka Kamera Pemindai" dan izinkan akses kamera.',
-    opening: 'Membuka kamera…',
-    scanHint: 'Letakkan barcode perintah kerja di dalam bingkai pemindaian.',
-    cameraError: 'Tidak dapat membuka kamera: ',
-    success: 'Pemindaian berhasil: '
+    title:
+      "Pemindai Barcode Perintah Kerja",
+
+    start:
+      "Buka Kamera Pemindai",
+
+    back:
+      "Kembali ke Sistem Waktu Kerja",
+
+    initial:
+      'Tekan "Buka Kamera Pemindai" dan izinkan akses kamera.',
+
+    opening:
+      "Membuka kamera…",
+
+    scanHint:
+      "Letakkan barcode perintah kerja di dalam bingkai pemindaian.",
+
+    cameraError:
+      "Tidak dapat membuka kamera: ",
+
+    success:
+      "Pemindaian berhasil: "
   }
+
 };
 
-const t = LANG[currentLang] || LANG.zh;
 
-const RETURN_URL = "https://script.google.com/macros/s/AKfycbxF9N5O0mXuTVBJh_C9tsFsMyKvr8UJEuFzNLYF3gLVWumDoqJENyNrO-i0JJKzCQ8/exec";
+const t =
+  LANG[currentLang] ||
+  LANG.zh;
+
+
+const RETURN_URL =
+  "https://script.google.com/macros/s/AKfycbxF9N5O0mXuTVBJh_C9tsFsMyKvr8UJEuFzNLYF3gLVWumDoqJENyNrO-i0JJKzCQ8/exec";
+
 
 const RETURN_WITH_LANG =
   RETURN_URL +
-  '?lang=' +
-  encodeURIComponent(currentLang);
+  "?lang=" +
+  encodeURIComponent(
+    currentLang
+  );
+
 
 let scanner = null;
+
 let isFinishing = false;
-  
+
+
 function applyLanguage() {
-  document.getElementById("titleText").textContent = t.title;
-  document.getElementById("startBtn").textContent = t.start;
-  document.getElementById("backBtn").textContent = t.back;
-  document.getElementById("msg").textContent = t.initial;
+
+  document.getElementById(
+    "titleText"
+  ).textContent =
+    t.title;
+
+  document.getElementById(
+    "startBtn"
+  ).textContent =
+    t.start;
+
+  document.getElementById(
+    "backBtn"
+  ).textContent =
+    t.back;
+
+  document.getElementById(
+    "msg"
+  ).textContent =
+    t.initial;
 }
-  window.onload = function() {
-  applyLanguage();
-};
+
+
+window.onload =
+  function() {
+
+    applyLanguage();
+
+  };
+
+
+function setMsg(text) {
+
+  document.getElementById(
+    "msg"
+  ).textContent =
+    text;
+
+}
+
+
 function startScanner() {
-  if (scanner && scanner.isScanning) return;
 
-  document.getElementById("startBtn").disabled = true;
-  setMsg(t.opening);
-
-  Html5Qrcode.getCameras()
-    .then(function(devices) {
-
-      if (!devices || devices.length === 0) {
-        throw new Error("No camera found");
-      }
-
-      let cameraId = devices[0].id;
-
-      // 優先找後鏡頭
-      const backCamera = devices.find(function(device) {
-        const label = (device.label || "").toLowerCase();
-
-        return (
-          label.includes("back") ||
-          label.includes("rear") ||
-          label.includes("environment")
-        );
-      });
-
-      if (backCamera) {
-        cameraId = backCamera.id;
-      }
-
-      if (!scanner) {
-        scanner = new Html5Qrcode("reader");
-      }
-
-      return scanner.start(
-        cameraId,
-        {
-          fps: 10,
-          qrbox: {
-            width: 280,
-            height: 140
-          }
-        },
-        onScanSuccess,
-        function() {}
-      );
-    })
-    .then(function() {
-      setMsg(t.scanHint);
-    })
-    .catch(function(err) {
-      document.getElementById("startBtn").disabled = false;
-
-      setMsg(
-        t.cameraError +
-        (err.message || err)
-      );
-    });
-}
-
-function onScanSuccess(decodedText) {
-  if (isFinishing) return;
-  isFinishing = true;
-
-  const code = String(decodedText || "").trim();
-  if (!code) {
-    isFinishing = false;
+  if (
+    scanner &&
+    scanner.isScanning
+  ) {
     return;
   }
 
- setMsg(t.success + code);
+
+  document.getElementById(
+    "startBtn"
+  ).disabled =
+    true;
+
+
+  setMsg(
+    t.opening
+  );
+
+
+  Html5Qrcode
+    .getCameras()
+
+    .then(
+      function(devices) {
+
+
+        if (
+          !devices ||
+          devices.length === 0
+        ) {
+
+          throw new Error(
+            "No camera found"
+          );
+
+        }
+
+
+        let cameraId =
+          devices[0].id;
+
+
+        // ==========================
+        // 優先尋找後鏡頭
+        // ==========================
+
+        const backCamera =
+          devices.find(
+            function(device) {
+
+              const label =
+                (
+                  device.label ||
+                  ""
+                ).toLowerCase();
+
+
+              return (
+
+                label.includes(
+                  "back"
+                ) ||
+
+                label.includes(
+                  "rear"
+                ) ||
+
+                label.includes(
+                  "environment"
+                )
+
+              );
+
+            }
+          );
+
+
+        if (
+          backCamera
+        ) {
+
+          cameraId =
+            backCamera.id;
+
+        }
+
+
+        if (
+          !scanner
+        ) {
+
+          scanner =
+            new Html5Qrcode(
+              "reader"
+            );
+
+        }
+
+
+        return scanner.start(
+
+          cameraId,
+
+          {
+
+            fps:
+              10,
+
+            qrbox: {
+
+              width:
+                280,
+
+              height:
+                140
+
+            }
+
+          },
+
+          onScanSuccess,
+
+          function() {}
+
+        );
+
+      }
+    )
+
+
+    .then(
+      function() {
+
+        setMsg(
+          t.scanHint
+        );
+
+      }
+    )
+
+
+    .catch(
+      function(err) {
+
+        document.getElementById(
+          "startBtn"
+        ).disabled =
+          false;
+
+
+        setMsg(
+
+          t.cameraError +
+
+          (
+            err.message ||
+            err
+          )
+
+        );
+
+      }
+    );
+
+}
+
+
+function onScanSuccess(
+  decodedText
+) {
+
+  if (
+    isFinishing
+  ) {
+    return;
+  }
+
+
+  isFinishing =
+    true;
+
+
+  const code =
+    String(
+      decodedText ||
+      ""
+    ).trim();
+
+
+  if (
+    !code
+  ) {
+
+    isFinishing =
+      false;
+
+    return;
+
+  }
+
+
+  setMsg(
+    t.success +
+    code
+  );
+
 
   const target =
-  RETURN_URL +
-  "?workOrder=" +
-  encodeURIComponent(code) +
-  "&lang=" +
-  encodeURIComponent(currentLang);
+    RETURN_URL +
 
-  if (scanner && scanner.isScanning) {
-    scanner.stop()
-      .catch(function() {})
-      .finally(function() {
-        window.location.href = target;
-      });
-  } else {
-    window.location.href = target;
+    "?workOrder=" +
+    encodeURIComponent(
+      code
+    ) +
+
+    "&lang=" +
+    encodeURIComponent(
+      currentLang
+    );
+
+
+  if (
+    scanner &&
+    scanner.isScanning
+  ) {
+
+    scanner
+      .stop()
+
+      .catch(
+        function() {}
+      )
+
+      .finally(
+        function() {
+
+          window.location.href =
+            target;
+
+        }
+      );
+
   }
+
+  else {
+
+    window.location.href =
+      target;
+
+  }
+
 }
+
 
 function goBack() {
-  if (scanner && scanner.isScanning) {
-    scanner.stop()
-      .catch(function() {})
-      .finally(function() {
-        window.location.href = RETURN_WITH_LANG;
-      });
-  } else {
-    window.location.href = RETURN_WITH_LANG;
+
+  if (
+    scanner &&
+    scanner.isScanning
+  ) {
+
+    scanner
+      .stop()
+
+      .catch(
+        function() {}
+      )
+
+      .finally(
+        function() {
+
+          window.location.href =
+            RETURN_WITH_LANG;
+
+        }
+      );
+
   }
+
+  else {
+
+    window.location.href =
+      RETURN_WITH_LANG;
+
+  }
+
 }
+
 </script>
+
 </body>
 </html>
