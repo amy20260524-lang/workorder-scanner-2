@@ -89,68 +89,41 @@ function applyLanguage() {
   window.onload = function() {
   applyLanguage();
 };
-function setMsg(text) {
-  document.getElementById("msg").textContent = text;
-}
-
 function startScanner() {
   if (scanner && scanner.isScanning) return;
 
   document.getElementById("startBtn").disabled = true;
   setMsg(t.opening);
 
-  Html5Qrcode.getCameras()
-    .then(function(devices) {
+  if (!scanner) {
+    scanner = new Html5Qrcode("reader");
+  }
 
-      if (!devices || devices.length === 0) {
-        throw new Error("No camera found");
+  scanner.start(
+    {
+      facingMode: "user"
+    },
+    {
+      fps: 10,
+      qrbox: {
+        width: 280,
+        height: 140
       }
+    },
+    onScanSuccess,
+    function() {}
+  )
+  .then(function() {
+    setMsg(t.scanHint);
+  })
+  .catch(function(err) {
+    document.getElementById("startBtn").disabled = false;
 
-      let cameraId = devices[0].id;
-
-   // 優先找前鏡頭
-const frontCamera = devices.find(function(device) {
-  const label = (device.label || "").toLowerCase();
-
-  return (
-    label.includes("front") ||
-    label.includes("user") ||
-    label.includes("face")
-  );
-});
-
-if (frontCamera) {
-  cameraId = frontCamera.id;
-}
-
-      if (!scanner) {
-        scanner = new Html5Qrcode("reader");
-      }
-
-      return scanner.start(
-        cameraId,
-        {
-          fps: 10,
-          qrbox: {
-            width: 280,
-            height: 140
-          }
-        },
-        onScanSuccess,
-        function() {}
-      );
-    })
-    .then(function() {
-      setMsg(t.scanHint);
-    })
-    .catch(function(err) {
-      document.getElementById("startBtn").disabled = false;
-
-      setMsg(
-        t.cameraError +
-        (err.message || err)
-      );
-    });
+    setMsg(
+      t.cameraError +
+      (err.message || err)
+    );
+  });
 }
 
 function onScanSuccess(decodedText) {
